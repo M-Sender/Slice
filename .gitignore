@@ -4,3 +4,4 @@ data/transactionCSV/oldFiles
 __pycache__/
 budgetEnv/
 *.env
+*.DS_Store

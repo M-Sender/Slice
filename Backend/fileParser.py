@@ -1,28 +1,33 @@
 import pandas as pd
 import re
 import os
+from utils.config import *
+from typing import *
 
 class fileParser:
     '''Assuming CSV to start'''
     def __init__(self) -> None:
-        self.transactions = []
+        self.transactions : List[Objects.CSVParse] = []
         pass
     
     def parseFile(self,filePath):
         df  = pd.read_csv(filePath)
-        df = df[df['Category']!="Transfer" and df['Category']!="Payments and Credits"]
+        try:
+            df = df[df['Category']!="Transfer" and df['Category']!="Payments and Credits"]
+        except:
+            pass
         #have dataframe
-        for row in df.iterrows():
+        for index,row in df.iterrows():
             date = row['Date']
             merchant = row['Description']
             amt  = abs(row['Amount'])
             date = pd.to_datetime(date)
-            transactionID = date.to_string() + merchant.to_string() + amt.to_string()
+            transactionID = date.strftime("%Y%m%d") + merchant + str(amt)
             #find merchant_ID
             merchant = re.sub('[^a-zA-Z]+', '', merchant)
             #if does not exist, create and return id
             #grab category ID as well, if creating new merchant, have option to create new category/sub and return that
-            self.transactions.append({'transactionID' : transactionID, 'date' : date, 'merchant' : merchant, 'amt' : amt})
+            self.transactions.append(Objects.CSVParse(ID=transactionID,merchant=merchant,Date=date,Price=amt))
     
     def readFiles(self):
         directory = '../data/transactionCSV'
