@@ -1,0 +1,5 @@
+data/*.db
+data/transactionCSV/*.*
+data/transactionCSV/oldFiles
+__pycache__/
+budgetEnv/
