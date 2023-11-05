@@ -19,10 +19,10 @@ class fileParser:
         #have dataframe
         for index,row in df.iterrows():
             date = row['Date']
-            merchant = row['Description']
+            merchant :str = row['Description']
             amt  = abs(row['Amount'])
             date = pd.to_datetime(date)
-            transactionID = date.strftime("%Y%m%d") + merchant + str(amt)
+            transactionID = date.strftime("%Y%m%d") + merchant.replace(" ","") + str(amt)
             #find merchant_ID
             merchant = re.sub('[^a-zA-Z]+', '', merchant)
             #if does not exist, create and return id
@@ -34,8 +34,8 @@ class fileParser:
         for filename in os.listdir(directory):
             f = os.path.join(directory, filename)
             # checking if it is a file
-            if os.path.isfile(f):
-               self.parseFile(f)
+            if os.path.isfile(f) and filename[-4:]==".csv":
+                self.parseFile(f)
     
     
     def createDictionary(self):
