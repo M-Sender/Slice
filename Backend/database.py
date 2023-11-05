@@ -5,18 +5,6 @@ from utils.config import *
 #from fuzzywuzzy import fuzz
 from typing import *
 
-
-'''
-Need to know if the tables already exist
-If they do, do nothing at this point
-if not, create a few tables{
-    transactionHistory [Date : Date, Merchant : String, Price : double, Category : String] :
-    merchantInfo [Merchant : String, Category : String] :
-    CategoryInfo [Category : String, Subgroup : String] : Hold all possible categories and subgroups (Food[Groceries, Restaurants], Travel[Plane, train], etc)
-   
-}
-
-'''
 class DatabaseConnect:
     '''Try to connect to database
     If does not exist/ any error, let user know and allow creation of new tables etc
