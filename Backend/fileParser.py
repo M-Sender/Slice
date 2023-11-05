@@ -18,16 +18,17 @@ class fileParser:
             pass
         #have dataframe
         for index,row in df.iterrows():
+            
             date = row['Date']
             merchant :str = row['Description']
             amt  = abs(row['Amount'])
             date = pd.to_datetime(date)
-            transactionID = date.strftime("%Y%m%d") + merchant.replace(" ","") + str(amt)
+            transactionID = hex(int((date.strftime("%Y%m%d")) + ''.join(str(ord(c)) for c in merchant) + str(amt).replace(".","")))
             #find merchant_ID
             merchant = re.sub('[^a-zA-Z]+', '', merchant)
             #if does not exist, create and return id
             #grab category ID as well, if creating new merchant, have option to create new category/sub and return that
-            self.transactions.append(Objects.CSVParse(ID=transactionID,merchant=merchant,Date=date,Price=amt))
+            self.transactions.append(Objects.CSVParse(ID=transactionID,Merchant=merchant,Date=date,Price=amt))
     
     def readFiles(self):
         directory = '../data/transactionCSV'

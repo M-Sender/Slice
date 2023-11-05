@@ -30,13 +30,6 @@ class Database:
             Subgroup_ID = "Subgroup_id"
             Subgroup = "Subgroup"
 class Objects:
-    '''Format   
-        Transaction_ID :str
-        Date :int
-        Merchant_ID :int
-        Price :float
-        Category_ID :int
-    '''
     @dataclass
     class Transaction:
         Transaction_ID :str
@@ -50,7 +43,7 @@ class Objects:
     @dataclass
     class CSVParse:
         ID :str
-        merchant :str
+        Merchant :str
         Date :datetime
         Price :float
         

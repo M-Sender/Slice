@@ -35,7 +35,7 @@ class DatabaseConnect:
         # Create TransactionHistory table
         self.c.execute('''
             CREATE TABLE IF NOT EXISTS {0}
-            ({1} INTEGER PRIMARY KEY, {2} REAL, {3} INTEGER, {4} REAL, {5} INTEGER,
+            ({1} TEXT PRIMARY KEY, {2} REAL, {3} INTEGER, {4} REAL, {5} INTEGER,
             FOREIGN KEY({5}) REFERENCES {6}({7}),
             FOREIGN KEY({4}) REFERENCES {8}({9})
             )
@@ -180,22 +180,21 @@ class DatabaseConnect:
             #match merchant to merchants and get catID
             catID = None
             #see if we have in merchantNames
-            merchantMatch :pd.DataFrame= merchantNames.loc[merchantNames[Database.Items.Merchant.merchant_Name] == transaction.merchant]
+            merchantMatch :pd.DataFrame= merchantNames.loc[merchantNames[Database.Items.Merchant.merchant_Name] == transaction.Merchant]
             if len(merchantMatch) !=0:
                 merchantID = merchantMatch[Database.Items.Merchant.Merchant_ID].item()
                 merchantName = merchantMatch[Database.Items.Merchant.merchant_Name].item()
                 catID = merchantInfo.iloc[merchantID][Database.Items.Category.Category_ID]#grab cat id from match
             else:
-                merchantID, merchantName, catID = self.createNewMerchant(transaction.merchant,merchantNames) #return a dataframe
+                merchantID, merchantName, catID = self.createNewMerchant(transaction.Merchant,merchantNames) #return a dataframe
                 MerchantFrame : Objects.Merchant= { Database.Items.Merchant.Merchant_ID:merchantID,
                                             Database.Items.Merchant.merchant_Name:merchantName,
                                             Database.Items.Category.Category_ID:catID}
-                MerchantNameFrame = {Database.Items.Merchant.merchant_Name:transaction.merchant,Database.Items.Merchant.Merchant_ID: merchantID}
+                MerchantNameFrame = {Database.Items.Merchant.merchant_Name:transaction.Merchant,Database.Items.Merchant.Merchant_ID: merchantID}
                 merchantInfo.loc[len(merchantInfo.index)] = MerchantFrame
                 merchantNames.loc[len(merchantNames.index)] = MerchantNameFrame
-            
-            
-            transactionObj :Objects.Transaction = (transaction.ID.strip(" "),
+            transactionIDs.append(transaction.ID)
+            transactionObj :Objects.Transaction = (transaction.ID,
                                                    transaction.Date.toordinal(),
                                                    merchantID,
                                                    transaction.Price,
@@ -219,6 +218,7 @@ class DatabaseConnect:
                     Database.Items.Category.Category_ID), 
                 cleanedTransactions)
                 cleanedTransactions.clear()
+                self.connection.commit()
         self.c.executemany("INSERT INTO {0} ({1},{2},{3},{4},{5}) VALUES (?,?,?,?,?)".format(
                     Database.Tables.TransactionHistory,
                     Database.Items.Transaction.Transaction_ID,
@@ -227,6 +227,7 @@ class DatabaseConnect:
                     Database.Items.Transaction.Price,
                     Database.Items.Category.Category_ID), 
                 cleanedTransactions)
+        self.connection.commit()
             #need to add merchant into tempmerchants to not have duplicates as sqlite will only be batched every 100?? and we want to be able to see them
             #build array to be stored in db
             #do commit every 100 and clear tempdb
