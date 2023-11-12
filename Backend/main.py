@@ -1,6 +1,10 @@
 from database import *
 from fileParser import fileParser
 from flask import Flask, request, jsonify
+from utils.category import *
+from utils.config import *
+from utils.merchant import *
+import asyncio
 
 db = DatabaseConnect()#create database session and connections
 db.createDatabases()
@@ -25,7 +29,13 @@ def handleCSVUpload():
     try:
         csvFile =  request.get_json()
         needsHandling = db.storeNewTransactions(csvFile)
-        packet = jsonify.jsonify(needsHandling)
+        returnDictionary = {}
+        returnDictionary["merchantHelp"] = needsHandling #decide if we need to just send merchant names/dates or price too
+        returnDictionary["merchantInfo"] = merchant.getMerchants(db.connection) #merch+ids
+        returnDictionary["categoryInfo"] = category.getCategories(db.connection)
+        returnDictionary["subGroupInfo"] = category.getSubGroups(db.connection)
+        packet = jsonify.jsonify(returnDictionary)
+        #need to send over all merchant names/ids, cat/ids, subgroups/ids
         return packet
     except Exception as e:
         return str(e), 400
@@ -34,9 +44,23 @@ def handleCSVUpload():
 def handleNewInfo():
     try:
         reworkedData =  request.get_json()
-        transactions = reworkedData["transactions"]
-        merchantInfo  = reworkedData["merchantInfo"]
-        #need to create all the new merchants + all info
+        transactions : List[Objects.Transaction] = reworkedData["transactions"]
+        subGroupInfo : List[Objects.Subgroup] = reworkedData["subGroupInfo"]
+        categoryInfo : List[Objects.Category] = reworkedData["CategoryInfo"]
+        
+        
+        newMerchantInfo : List[Objects.Merchant]  = reworkedData["newMerchantInfo"]
+        newMerchantMapping : List[Objects.MerchantMapping] = reworkedData["newMerchantMappings"]
+        
+        #This order of operations are very importants
+        #may need to do some working for create new ids for each increment
+        #create new subgroups + categories
+        category.createSubgroups(subGroupInfo,db.connection)
+        category.createNewCategories(categoryInfo,db.connection)
+        
+        #create new merchants + mapping info
+        merchant.createNewMerchants(newMerchantInfo,db.connection)
+        merchant.createNewMerchantMappings(newMerchantMapping,db.connection)
         
         # then send using db.storeNewtransactions so everything is shared
         needsHandling = db.storeNewTransactions(transactions)

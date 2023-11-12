@@ -58,3 +58,15 @@ class Objects:
         Category_ID :int
         Category :str
         Subgroup_ID :int
+    
+    @dataclass
+    class Subgroup:
+        Subgroup: str
+        Subgroup_ID :int
+        
+    @dataclass
+    class MerchantMapping:
+        MerchantName : str
+        Merchant_ID :int
+        
+        

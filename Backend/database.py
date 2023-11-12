@@ -212,7 +212,12 @@ class DatabaseConnect:
                     transactions)
         self.connection.commit()
     
-    def createNewMerchant(self,merchant: str, merchants: pd.DataFrame):
+    def createNew
+    
+    def createNewBudgetCategories(self,newBudgetInfo : List[Objects.Category]) -> None:
+        pass
+    
+    def createNewMerchants(self,newMerchants : List[Objects.Merchant]) -> None:
         #we have a new merchant, ask to map with current one or create a new
         ''' print(merchant)
         choice = input("Unknown merchant found. Create a new one or look to see if you can map with a current one?(1 or 2)")
