@@ -10,8 +10,27 @@ class fileParser:
         self.transactions : List[Objects.CSVParse] = []
         pass
     
+    #region Local Files
     def parseFile(self,filePath):
         df  = pd.read_csv(filePath)
+        self.createTempTransactions(df)
+        
+    def readFiles(self):
+        directory = '../data/transactionCSV'
+        for filename in os.listdir(directory):
+            f = os.path.join(directory, filename)
+            # checking if it is a file
+            if os.path.isfile(f) and filename[-4:]==".csv":
+                self.parseFile(f)
+    #endregion
+    
+    #region CSV Upload
+    
+    #endregion
+    
+    
+    #region Shared Logic
+    def createTempTransactions(self,df: List[Objects.CSVParse]):
         try:
             df = df[df['Category']!="Transfer" and df['Category']!="Payments and Credits"]
         except:
@@ -30,14 +49,6 @@ class fileParser:
             #grab category ID as well, if creating new merchant, have option to create new category/sub and return that
             self.transactions.append(Objects.CSVParse(ID=transactionID,Merchant=merchant,Date=date,Price=amt))
     
-    def readFiles(self):
-        directory = '../data/transactionCSV'
-        for filename in os.listdir(directory):
-            f = os.path.join(directory, filename)
-            # checking if it is a file
-            if os.path.isfile(f) and filename[-4:]==".csv":
-                self.parseFile(f)
-    
-    
+    #endregion
     def createDictionary(self):
         pass
