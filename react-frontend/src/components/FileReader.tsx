@@ -5,11 +5,11 @@ function fileRead(){
 
     const fileReader = new FileReader()
 
-    const handleOnChange = (e) => {
+    const handleOnChange = (e : any) => {
         setFile(e.target.files[0]);};
 
         
-    const handleOnSubmit = (e) =>{
+    const handleOnSubmit = (e : any) =>{
         e.preventDefault();
         
         if (file){
