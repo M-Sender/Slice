@@ -6,3 +6,4 @@ budgetEnv/
 *.env
 *.DS_Store
 react-frontend/node_modules/
+*.csv
