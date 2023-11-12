@@ -31,7 +31,7 @@
    
        if (file) {
          fileReader.onload = function (event) {
-           const text = event.target.result;
+           const text = event!.target!.result;
            csvFileToArray(text);
          };
    
@@ -43,7 +43,7 @@
    
      return (
        <div style={{ textAlign: "center" }}>
-         <h1>REACTJS CSV IMPORT EXAMPLE </h1>
+         <h1>CSV IMPORT</h1>
          <form>
            <input
              type={"file"}
@@ -74,9 +74,9 @@
    
            <tbody>
              {array.map((item) => (
-               <tr key={item.id}>
+               <tr key={item['id']}>
                  {Object.values(item).map((val) => (
-                   <td>{val}</td>
+                   <td>{String(val)}</td>
                  ))}
                </tr>
              ))}
@@ -85,4 +85,3 @@
        </div>
      );
    }
-   ....

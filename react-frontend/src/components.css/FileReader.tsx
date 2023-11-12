@@ -14,7 +14,7 @@ function fileRead(){
         
         if (file){
             fileReader.onload = function (event) {
-                const fileOutput = event.target.result;
+                const fileOutput = event!.target!.result;
             };
 
             fileReader.readAsText(file);
