@@ -5,3 +5,4 @@ __pycache__/
 budgetEnv/
 *.env
 *.DS_Store
+react-frontend/node_modules/

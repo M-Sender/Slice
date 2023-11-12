@@ -146,7 +146,7 @@ class DatabaseConnect:
 
         except Error as e:
             print(e)
-    def storeNewTransactions(self,transactions : List[Objects.CSVParse]):
+    def storeNewTransactions(self,transactions : List[Objects.CSVParse]) -> List[any]: 
         #grab all transaction ids so we can check if we have duplicate before inserting in execmany
         #rows = self.cursor.execute("SELECT transactionID FROM {}".format("transactionHistory"))
         transactionIDs = pd.read_sql_query("SELECT {0} FROM {1}".format(Database.Items.Transaction.Transaction_ID,Database.Tables.TransactionHistory), self.connection)
@@ -158,6 +158,7 @@ class DatabaseConnect:
         merchantNames :pd.DataFrame  = pd.read_sql_query("SELECT * FROM {0}".format(Database.Tables.MerchantNames),self.connection)
         
         cleanedTransactions :List[Objects.Transaction] = []
+        transactionsNeedingHandling : List[any]
         
         #loop through
         for transaction in transactions:
@@ -173,40 +174,34 @@ class DatabaseConnect:
                 merchantID = merchantMatch[Database.Items.Merchant.Merchant_ID].item()
                 merchantName = merchantMatch[Database.Items.Merchant.merchant_Name].item()
                 catID = merchantInfo.iloc[merchantID][Database.Items.Category.Category_ID]#grab cat id from match
-            else:
-                merchantID, merchantName, catID = self.createNewMerchant(transaction.Merchant,merchantNames) #return a dataframe
-                MerchantFrame : Objects.Merchant= { Database.Items.Merchant.Merchant_ID:merchantID,
-                                            Database.Items.Merchant.merchant_Name:merchantName,
-                                            Database.Items.Category.Category_ID:catID}
-                MerchantNameFrame = {Database.Items.Merchant.merchant_Name:transaction.Merchant,Database.Items.Merchant.Merchant_ID: merchantID}
-                merchantInfo.loc[len(merchantInfo.index)] = MerchantFrame
-                merchantNames.loc[len(merchantNames.index)] = MerchantNameFrame
-            transactionIDs.append(transaction.ID)
-            transactionObj :Objects.Transaction = (transaction.ID,
+                transactionIDs.append(transaction.ID)
+                transactionObj :Objects.Transaction = (transaction.ID,
                                                    transaction.Date.toordinal(),
                                                    merchantID,
                                                    transaction.Price,
                                                    catID) 
-                       
-            '''{Database.Items.Transaction.Transaction_ID:transaction.ID,
-                                                   Database.Items.Transaction.Date:transaction.Date,
-                                                   Database.Items.Merchant.Merchant_ID: merchantID,
-                                                   Database.Items.Transaction.Price: transaction.Price,
-                                                   Database.Items.Category.Category_ID : catID
-                                                   }'''
-            cleanedTransactions.append(transactionObj)
-            if len(cleanedTransactions) > 50:
-                print(cleanedTransactions[0])
-                self.c.executemany("INSERT INTO {0} ({1},{2},{3},{4},{5}) VALUES (?,?,?,?,?)".format(
-                    Database.Tables.TransactionHistory,
-                    Database.Items.Transaction.Transaction_ID,
-                    Database.Items.Transaction.Date,
-                    Database.Items.Merchant.Merchant_ID,
-                    Database.Items.Transaction.Price,
-                    Database.Items.Category.Category_ID), 
-                cleanedTransactions)
-                cleanedTransactions.clear()
-                self.connection.commit()
+                
+                cleanedTransactions.append(transactionObj)
+                if len(cleanedTransactions) > 50:
+                    self.storeTransactions(cleanedTransactions)
+                    cleanedTransactions.clear()
+            else:
+                #send to client to make changes
+                #merchantID, merchantName, catID = self.createNewMerchant(transaction.Merchant,merchantNames) #return a dataframe
+                transactionsNeedingHandling.append(transaction)
+                
+                '''MerchantFrame : Objects.Merchant= { Database.Items.Merchant.Merchant_ID:merchantID,
+                                            Database.Items.Merchant.merchant_Name:merchantName,
+                                            Database.Items.Category.Category_ID:catID}
+                MerchantNameFrame = {Database.Items.Merchant.merchant_Name:transaction.Merchant,Database.Items.Merchant.Merchant_ID: merchantID}
+                merchantInfo.loc[len(merchantInfo.index)] = MerchantFrame
+                merchantNames.loc[len(merchantNames.index)] = MerchantNameFrame'''
+
+
+        self.storeNewTransactions(cleanedTransactions)
+        return transactionsNeedingHandling
+    
+    def storeTransactions(self,transactions:List[Objects.Transaction]):
         self.c.executemany("INSERT INTO {0} ({1},{2},{3},{4},{5}) VALUES (?,?,?,?,?)".format(
                     Database.Tables.TransactionHistory,
                     Database.Items.Transaction.Transaction_ID,
@@ -214,18 +209,9 @@ class DatabaseConnect:
                     Database.Items.Merchant.Merchant_ID,
                     Database.Items.Transaction.Price,
                     Database.Items.Category.Category_ID), 
-                cleanedTransactions)
+                    transactions)
         self.connection.commit()
-            #need to add merchant into tempmerchants to not have duplicates as sqlite will only be batched every 100?? and we want to be able to see them
-            #build array to be stored in db
-            #do commit every 100 and clear tempdb
-            
-            #DONE
-        ## do final commit and clear temodb (more of a principal but unnesccary)
-            
-            
-            
-        pass
+    
     def createNewMerchant(self,merchant: str, merchants: pd.DataFrame):
         #we have a new merchant, ask to map with current one or create a new
         ''' print(merchant)
