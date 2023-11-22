@@ -211,30 +211,10 @@ class DatabaseConnect:
                     Database.Items.Category.Category_ID), 
                     transactions)
         self.connection.commit()
+
+    def createNewBudgetCategories(self,newBudgetInfo : List[Objects.Category]) -> None:
+        pass
     
-    def createNewMerchant(self,merchant: str, merchants: pd.DataFrame):
-        #we have a new merchant, ask to map with current one or create a new
-        ''' print(merchant)
-        choice = input("Unknown merchant found. Create a new one or look to see if you can map with a current one?(1 or 2)")
-        merchantID = None
-        catID = None
-        merchantName = None
-        if choice==1:
-            #create a new one
-            #ask for display name
-            #need to assign a category
-            #can create a new category, Maybe new sub categories too instead of just choosing?? (later date)
-            #if creating a new category, ask for name and (subgroups need to be considered), return catID for use
-            #if reusing, return catID
-            #create a merchant in merchantInfo
-            #make mapping in merchantInfo
-            pass
-        else:
-            #map with current one 
-            #do this by having user select which id their new merchant matches with
-            #add to merchantName table to map theirs with officical name and send back merchantID and the cat
-            pass'''
-        return [len(merchants),"UNKOWN",0]
         #return [merchantID, merchantName,  catID]
         
         
