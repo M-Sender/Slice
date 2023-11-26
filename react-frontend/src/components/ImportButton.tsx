@@ -1,19 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 import axios from "axios";
 import csvtojson from 'csvtojson';
-import { async } from "q";
+//import { async } from "q";
+import config from "../config";
 
-function Import_Button() {
+
+
+function ImportButton() {
+    
     return(
         <div style= {{textAlign:"center"}}>
-            <h1>Slice</h1>
             <form id ="input-button" >
-                <input type={"file"} accept={".csv"}/>
+                <input type={"file"} accept={".csv"} onChange={(e) => sendCSV(e.target.value)}/>
                 <input type = "submit" value = 'Upload'/>
-                <button type='submit'>Import CSV Budget Sheet</button>
             </form>
         </div>
     );
+}
+
+const sendCSV = (CSV : any ) =>{
+    sendJsonToApi(convertCsvToJson(CSV));
 }
 
 const convertCsvToJson = async (csvFile) => {
@@ -23,7 +29,7 @@ const convertCsvToJson = async (csvFile) => {
 
 const sendJsonToApi = async(jsonData) =>{
     try {
-        const response = await axios.post('API Endpoint',jsonData,{
+        const response = await axios.post(config.server.route+"/uploadCSV",jsonData,{
             headers:{
                 'Content-Type':'application/json',
             },
@@ -37,4 +43,4 @@ const sendJsonToApi = async(jsonData) =>{
 
 
 
-export default Import_Button;
+export default ImportButton;
